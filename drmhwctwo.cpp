@@ -903,6 +903,15 @@ HWC2::Error DrmHwcTwo::HwcDisplay::ValidateDisplay(uint32_t *num_types,
   *num_requests = 0;
   size_t avail_planes = primary_planes_.size() + overlay_planes_.size();
 
+#ifdef USE_CLIENT_COMPOSITION
+  (void) avail_planes;
+  for (std::pair<const hwc2_layer_t, DrmHwcTwo::HwcLayer> &l : layers_) {
+    l.second.set_validated_type(HWC2::Composition::Client );
+    ++*num_types;
+  }
+  return HWC2::Error::HasChanges;
+#else
+
   /*
    * If more layers then planes, save one plane
    * for client composited layers
@@ -978,6 +987,7 @@ HWC2::Error DrmHwcTwo::HwcDisplay::ValidateDisplay(uint32_t *num_types,
   total_stats_.total_pixops_ += total_pixops;
 
   return *num_types ? HWC2::Error::HasChanges : HWC2::Error::None;
+#endif
 }
 
 #if PLATFORM_SDK_VERSION > 28
