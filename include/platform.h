@@ -55,6 +55,9 @@ class Importer {
 
   // Convert platform-dependent buffer format to drm_hwc internal format.
   virtual int ConvertBoInfo(buffer_handle_t handle, hwc_drm_bo_t *bo) = 0;
+
+  // Propagate display hotplug event to the platform part
+  virtual void HandleHotplug(bool connected) = 0;
 };
 
 class Planner {

@@ -1189,6 +1189,7 @@ void DrmHwcTwo::DrmHotplugHandler::HandleEvent(uint64_t timestamp_us) {
     }
 
     hwc2_->HandleDisplayHotplug(display_id, cur_state);
+    hwc2_->resource_manager_.GetImporter(display_id)->HandleHotplug();
   }
 }
 

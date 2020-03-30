@@ -45,6 +45,8 @@ class DrmGenericImporter : public Importer {
   int ReleaseHandle(uint32_t gem_handle);
 
   int ConvertBoInfo(buffer_handle_t handle, hwc_drm_bo_t *bo) override;
+  void HandleHotplug(bool connected) override {
+  }
 
   uint32_t ConvertHalFormatToDrm(uint32_t hal_format);
   uint32_t DrmFormatToBitsPerPixel(uint32_t drm_format);
