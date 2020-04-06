@@ -1155,6 +1155,8 @@ void DrmHwcTwo::HandleDisplayHotplug(hwc2_display_t displayid, int state) {
   hotplug(cb->second.data, displayid,
           (state == DRM_MODE_CONNECTED ? HWC2_CONNECTION_CONNECTED
                                        : HWC2_CONNECTION_DISCONNECTED));
+  resource_manager_.GetImporter(displayid)->HandleHotplug(state ==
+                                                          DRM_MODE_CONNECTED);
 }
 
 void DrmHwcTwo::HandleInitialHotplugState(DrmDevice *drmDevice) {
@@ -1180,6 +1182,7 @@ void DrmHwcTwo::DrmHotplugHandler::HandleEvent(uint64_t timestamp_us) {
           conn->id(), conn->display());
 
     int display_id = conn->display();
+    hwc2_->HandleDisplayHotplug(display_id, cur_state);
     if (cur_state == DRM_MODE_CONNECTED) {
       auto &display = hwc2_->displays_.at(display_id);
       display.ChosePreferredConfig();
@@ -1187,9 +1190,6 @@ void DrmHwcTwo::DrmHotplugHandler::HandleEvent(uint64_t timestamp_us) {
       auto &display = hwc2_->displays_.at(display_id);
       display.ClearDisplay();
     }
-
-    hwc2_->HandleDisplayHotplug(display_id, cur_state);
-    hwc2_->resource_manager_.GetImporter(display_id)->HandleHotplug();
   }
 }
 
