@@ -139,6 +139,19 @@ int DrmGenericImporter::ImportBuffer(buffer_handle_t handle, hwc_drm_bo_t *bo) {
   if (ret)
     return ret;
 
+#ifdef ENABLE_GEM_HANDLE_CACHING
+  if (isCachable(bo)) {
+    std::lock_guard<std::mutex> lock(cache_mutex_);
+    if (!display_connected_)
+      return -EINVAL;
+    auto it = cached_bo_.find(bo->prime_fds[0]);
+    if (it != cached_bo_.end()) {
+      *bo = it->second;
+      return 0;
+    }
+  }
+#endif
+
   ret = drmPrimeFDToHandle(drm_->fd(), bo->prime_fds[0], &bo->gem_handles[0]);
   if (ret) {
     ALOGE("failed to import prime fd %d ret=%d", bo->prime_fds[0], ret);
@@ -173,11 +186,30 @@ int DrmGenericImporter::ImportBuffer(buffer_handle_t handle, hwc_drm_bo_t *bo) {
   }
 
   ImportHandle(bo->gem_handles[0]);
+#ifdef ENABLE_GEM_HANDLE_CACHING
+  if (isCachable(bo)) {
+    std::lock_guard<std::mutex> lock(cache_mutex_);
+    cached_bo_.insert(std::make_pair(bo->prime_fds[0], *bo));
+  }
+#endif
 
   return ret;
 }
 
 int DrmGenericImporter::ReleaseBuffer(hwc_drm_bo_t *bo) {
+#ifdef ENABLE_GEM_HANDLE_CACHING
+  if (isCachable(bo)) {
+    std::lock_guard<std::mutex> lock(cache_mutex_);
+    if ((!display_connected_) || (cached_bo_.count(bo->prime_fds[0]) > 0)) {
+      return 0;
+    }
+  }
+  ReleaseBufferImpl(bo);
+  return 0;
+}
+
+int DrmGenericImporter::ReleaseBufferImpl(hwc_drm_bo_t *bo) {
+#endif
   if (bo->fb_id)
     if (drmModeRmFB(drm_->fd(), bo->fb_id))
       ALOGE("Failed to rm fb");
@@ -249,4 +281,25 @@ int DrmGenericImporter::CloseHandle(uint32_t gem_handle) {
 
   return ret;
 }
+
+void DrmGenericImporter::HandleHotplug(bool connected) {
+#ifdef ENABLE_GEM_HANDLE_CACHING
+  std::lock_guard<std::mutex> lock(cache_mutex_);
+  display_connected_ = connected;
+  if (!connected) {
+    for (auto it = cached_bo_.begin(); it != cached_bo_.end();) {
+      ReleaseBufferImpl(&it->second);
+      it = cached_bo_.erase(it);
+    }
+  }
+#else
+  std::ignore = connected;
+#endif
+}
+
+#ifdef ENABLE_GEM_HANDLE_CACHING
+bool DrmGenericImporter::isCachable(hwc_drm_bo_t *bo) {
+  return (bo->usage & GRALLOC_USAGE_HW_FB);
+}
+#endif
 }

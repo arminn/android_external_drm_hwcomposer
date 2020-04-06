@@ -45,8 +45,7 @@ class DrmGenericImporter : public Importer {
   int ReleaseHandle(uint32_t gem_handle);
 
   int ConvertBoInfo(buffer_handle_t handle, hwc_drm_bo_t *bo) override;
-  void HandleHotplug(bool connected) override {
-  }
+  void HandleHotplug(bool connected) override;
 
   uint32_t ConvertHalFormatToDrm(uint32_t hal_format);
   uint32_t DrmFormatToBitsPerPixel(uint32_t drm_format);
@@ -60,6 +59,13 @@ class DrmGenericImporter : public Importer {
 
   int CloseHandle(uint32_t gem_handle);
   std::map<uint32_t, int> gem_refcount_;
+#ifdef ENABLE_GEM_HANDLE_CACHING
+  int ReleaseBufferImpl(hwc_drm_bo_t *bo);
+  bool isCachable(hwc_drm_bo_t *bo);
+  std::map<uint64_t, hwc_drm_bo_t> cached_bo_;
+  std::mutex cache_mutex_;
+  bool display_connected_;
+#endif
 };
 }  // namespace android
 
