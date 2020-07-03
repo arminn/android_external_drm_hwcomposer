@@ -201,6 +201,7 @@ class DrmHwcTwo : public hwc2_device_t {
                                              uint8_t *outData);
     HWC2::Error GetDisplayCapabilities(uint32_t *outNumCapabilities,
                                        uint32_t *outCapabilities);
+    HWC2::Error GetDisplayBrightnessSupport(bool *supported);
 #endif
     HWC2::Error GetDozeSupport(int32_t *support);
     HWC2::Error GetHdrCapabilities(uint32_t *num_types, int32_t *types,
