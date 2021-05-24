@@ -26,6 +26,7 @@
 #include "bufferinfo/BufferInfoGetter.h"
 #include "utils/log.h"
 #include "utils/properties.h"
+#include "drm/ImaginationImporter.h"
 
 namespace android {
 
@@ -82,7 +83,7 @@ int ResourceManager::AddDrmDevice(std::string const &path) {
   if (ret)
     return ret;
   std::shared_ptr<Importer> importer;
-  importer = std::make_shared<DrmGenericImporter>(drm.get());
+  importer = std::make_shared<ImaginationImporter>(drm.get());
   if (!importer) {
     ALOGE("Failed to create importer instance");
     return -ENODEV;

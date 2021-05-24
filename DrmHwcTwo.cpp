@@ -863,7 +863,8 @@ HWC2::Error DrmHwcTwo::HwcDisplay::ValidateDisplay(uint32_t *num_types,
                                                    uint32_t *num_requests) {
   supported(__func__);
 #ifdef USE_CLIENT_COMPOSITION
-  (void) avail_planes;
+  (void) num_types;
+  (void) num_requests;
   for (std::pair<const hwc2_layer_t, DrmHwcTwo::HwcLayer> &l : layers_) {
     l.second.set_validated_type(HWC2::Composition::Client );
     ++*num_types;
@@ -1203,6 +1204,7 @@ void DrmHwcTwo::DrmHotplugHandler::HandleEvent(uint64_t timestamp_us) {
     } else {
       auto &display = hwc2_->displays_.at(display_id);
       display.ClearDisplay();
+      hwc2_->resource_manager_.GetImporter(display_id)->HandleHotplug();
     }
 
     hwc2_->HandleDisplayHotplug(display_id, cur_state);

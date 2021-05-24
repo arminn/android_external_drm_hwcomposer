@@ -38,7 +38,7 @@ int BufferInfoImagination::ConvertBoInfo(buffer_handle_t handle,
     ALOGV("Special buffer formats are not supported");
     return -EINVAL;
   }
-
+  bo->priv = (void*)handle;
   bo->width = hnd->iWidth;
   bo->height = hnd->iHeight;
   bo->usage = hnd->usage;
