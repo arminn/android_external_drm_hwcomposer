@@ -132,7 +132,7 @@ cc_library_shared {
 // Used by hwcomposer.drm_imagination
 filegroup {
     name: "drm_hwcomposer_platformimagination",
-    srcs: ["bufferinfo/legacy/BufferInfoImagination.cpp"],
+    srcs: ["bufferinfo/legacy/BufferInfoImagination.cpp", "drm/ImaginationImporter.cpp"],
 }
 
 // Used by hwcomposer.drm_hikey and hwcomposer.drm_hikey960

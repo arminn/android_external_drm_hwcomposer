@@ -46,6 +46,9 @@ class Importer {
   // Note: This can be called from a different thread than ImportBuffer. The
   //       implementation is responsible for ensuring thread safety.
   virtual int ReleaseBuffer(hwc_drm_bo_t *bo) = 0;
+
+  // Propagate display hotplug event to the platform part
+  virtual void HandleHotplug() = 0;
 };
 
 class DrmGenericImporter : public Importer {
@@ -57,6 +60,7 @@ class DrmGenericImporter : public Importer {
   int ReleaseBuffer(hwc_drm_bo_t *bo) override;
   int ImportHandle(uint32_t gem_handle);
   int ReleaseHandle(uint32_t gem_handle);
+  void HandleHotplug() {}
 
  protected:
   DrmDevice *drm_;
