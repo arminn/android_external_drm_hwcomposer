@@ -862,17 +862,7 @@ HWC2::Error DrmHwcTwo::HwcDisplay::SetVsyncEnabled(int32_t enabled) {
 HWC2::Error DrmHwcTwo::HwcDisplay::ValidateDisplay(uint32_t *num_types,
                                                    uint32_t *num_requests) {
   supported(__func__);
-#ifdef USE_CLIENT_COMPOSITION
-  (void) num_types;
-  (void) num_requests;
-  for (std::pair<const hwc2_layer_t, DrmHwcTwo::HwcLayer> &l : layers_) {
-    l.second.set_validated_type(HWC2::Composition::Client );
-    ++*num_types;
-  }
-  return HWC2::Error::HasChanges;
-#else
   return backend_->ValidateDisplay(this, num_types, num_requests);
-#endif
 }
 
 std::vector<DrmHwcTwo::HwcLayer *>
